@@ -16,8 +16,16 @@ public class MessageController {
   @RequestMapping(method = RequestMethod.GET)
   @ResponseBody
   public String sendMessage() {
-    messageService.sendMessage("test");
+    messageService.sendMessage("some strange message");
 
     return "success";
+  }
+
+  @RequestMapping(value = "/error", method = RequestMethod.GET)
+  @ResponseBody
+  public String sendErrorCausingMessage() {
+    messageService.sendErrorMessage("causes error");
+
+    return "failed";
   }
 }

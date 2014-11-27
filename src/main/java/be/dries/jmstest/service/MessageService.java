@@ -1,5 +1,6 @@
 package be.dries.jmstest.service;
 
+import be.dries.jmstest.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -20,10 +21,23 @@ public class MessageService {
   @Autowired
   @Qualifier("mailQueue")
   private Queue queue;
+  @Autowired
+  private MessageRepository messageRepository;
 
   @Transactional
   public void sendMessage(String message) {
     jmsTemplate.send(queue, new SimpleMessageCreator(message));
+
+    messageRepository.saveMessage(message);
+  }
+
+  @Transactional
+  public void sendErrorMessage(String message) {
+    jmsTemplate.send(queue, new SimpleMessageCreator(message));
+
+    messageRepository.saveMessage(message);
+
+    throw new RuntimeException("Nothing will be send or persisted, because this exception causes the transaction to rollback");
   }
 
   private class SimpleMessageCreator implements MessageCreator {

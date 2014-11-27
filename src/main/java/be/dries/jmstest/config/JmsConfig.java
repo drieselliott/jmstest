@@ -33,7 +33,6 @@ public class JmsConfig {
     mailQueueListenerContainer.setConcurrentConsumers(10);
     mailQueueListenerContainer.setMaxConcurrentConsumers(20);
     mailQueueListenerContainer.setTransactionManager(transactionManager);
-    mailQueueListenerContainer.setSessionTransacted(true);
 
     return mailQueueListenerContainer;
   }

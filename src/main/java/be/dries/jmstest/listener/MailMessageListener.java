@@ -1,12 +1,13 @@
 package be.dries.jmstest.listener;
 
-import be.dries.jmstest.repository.MessageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import be.dries.jmstest.repository.MessageRepository;
 
 public class MailMessageListener implements MessageListener {
   @Autowired
@@ -20,6 +21,7 @@ public class MailMessageListener implements MessageListener {
         String textMessage = (String) jmsMessage.getObject();
 
         messageRepository.saveMessage(textMessage + textMessage);
+        messageRepository.saveInNewTransaction(textMessage + textMessage);
         System.out.println(textMessage);
       } catch (JMSException e) {
         e.printStackTrace();

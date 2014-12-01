@@ -1,6 +1,11 @@
 package be.dries.jmstest.service;
 
-import be.dries.jmstest.repository.MessageRepository;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.ObjectMessage;
+import javax.jms.Queue;
+import javax.jms.Session;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -8,32 +13,39 @@ import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.Session;
+import be.dries.jmstest.annotation.TestAnnotation;
+import be.dries.jmstest.repository.MessageRepository;
 
 @Service
 public class MessageService {
   @Autowired
-  private JmsTemplate jmsTemplate;
+  @Qualifier("managementJmsTemplate")
+  private JmsTemplate managementJmsTemplate;
+  @Autowired
+  @Qualifier("mailJmsTemplate")
+  private JmsTemplate mailJmsTemplate;
   @Autowired
   @Qualifier("mailQueue")
-  private Queue queue;
+  private Queue mailQueue;
+  @Autowired
+  @Qualifier("managementQueue")
+  private Queue managementQueue;
   @Autowired
   private MessageRepository messageRepository;
 
   @Transactional
+  @TestAnnotation
   public void sendMessage(String message) {
-    jmsTemplate.send(queue, new SimpleMessageCreator(message));
+    mailJmsTemplate.send(mailQueue, new SimpleMessageCreator(message));
+    managementJmsTemplate.send(managementQueue, new SimpleMessageCreator(message));
 
     messageRepository.saveMessage(message);
+    messageRepository.saveInNewTransaction(message);
   }
 
   @Transactional
   public void sendErrorMessage(String message) {
-    jmsTemplate.send(queue, new SimpleMessageCreator(message));
+    mailJmsTemplate.send(mailQueue, new SimpleMessageCreator(message));
 
     messageRepository.saveMessage(message);
 
